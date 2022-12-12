@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 internal class Program
@@ -12,88 +12,94 @@ internal class Program
 
 class Fight
 {
-    private List<Warrior> _fighters = new List<Warrior>();
-    public Warrior Player1 { get; private set; }
-    public Warrior Player2 { get; private set; }    
-
     public void StartBattle()
     {
-        Add();
+        List<Warrior> fighters = new List<Warrior>();
         byte playerCount = 1;
         string namePlayer1 = EnterName(playerCount);
         playerCount++;
         string namePlayer2 = EnterName(playerCount);
-        Player1 = ChooseWar(namePlayer1);
-        Player2 = ChooseWar(namePlayer2);
-
+        fighters.Add(ChooseWar(namePlayer1));
+        fighters.Add(ChooseWar(namePlayer2));
+        Warrior firstFighter = fighters[0];
+        Warrior secondFighter = fighters[1];
         Console.WriteLine("Да начнется битва!");
 
-        while(Player1.Health > 0 && Player2.Health > 0)
+        while (firstFighter.Health > 0 && secondFighter.Health > 0)
         {
-            Player1.TakeDamage(Player2.MakeDamage());
-            Player2.TakeDamage(Player1.MakeDamage());
-            ShowStats(Player1);
-            ShowStats(Player2);
+            firstFighter.TakeDamage(secondFighter.MakeDamage());
+            secondFighter.TakeDamage(firstFighter.MakeDamage());
+            ShowStats(firstFighter);
+            ShowStats(secondFighter);
             Console.ReadKey();
         }
     }
 
     private Warrior ChooseWar(string namePlayer)
     {
-        Console.WriteLine(namePlayer + " выберите бойца: ");
-        ShowWarrior();
-        return _fighters[GetNumber()];   
+        const string CommandWarrior = "Воин";
+        const string CommandTank = "Танк";
+        const string CommandPriest = "Жрец";
+        const string CommandRogue = "Разбойник";
+        const string CommandShaman = "Шаман";
+
+        Console.WriteLine("\n" + namePlayer + " выберите бойца, написав его имя: ");
+        ShowApplicants();
+
+        string userChoice = Console.ReadLine();
+
+        switch (userChoice)
+        {
+            case CommandWarrior:
+                return new Warrior();
+
+            case CommandTank:
+                return new Tank();
+
+            case CommandPriest:
+                return new Priest();
+
+            case CommandRogue:
+                return new Rogue();
+
+            case CommandShaman:
+                return new Shaman();
+        }
+
+        return null;
     }
 
-    private void Add()
+    private List<Warrior> GetApplicants()
     {
-        _fighters.Add(new Warrior());
-        _fighters.Add(new Tank());
-        _fighters.Add(new Priest());
-        _fighters.Add(new Rogue());
-        _fighters.Add(new Shaman());
+        List<Warrior> applicants = new List<Warrior>();
+        applicants.Add(new Warrior());
+        applicants.Add(new Tank());
+        applicants.Add(new Priest());
+        applicants.Add(new Rogue());
+        applicants.Add(new Shaman());
+
+        return applicants;
     }
 
     private string EnterName(byte playerCount)
-    {        
+    {
         Console.WriteLine("Для старта битвы введите своё имя, игрок номер " + playerCount);
         return Console.ReadLine();
     }
 
-    private void ShowWarrior()
+    private void ShowApplicants()
     {
-        int idWar = 0;
+        List<Warrior> applicants = GetApplicants();
 
-        foreach (Warrior warrior in _fighters)
+        foreach (Warrior warrior in applicants)
         {
-            Console.Write(idWar++ + " ");
             warrior.ShowInfo();
         }
     }
 
-    private void ShowStats(Warrior player)
+    private void ShowStats(Warrior fighter)
     {
-        Console.WriteLine(player.Name + " HP: " + player.Health); 
-    }
-
-    private int GetNumber()
-    {
-        bool isParse = false;
-        int numberForReturn = 0;
-
-        while (isParse == false)
-        {
-            string userNumber = Console.ReadLine();
-
-            if ((isParse = int.TryParse(userNumber, out int number)) == false)
-            {
-                Console.WriteLine("Вы не корректно ввели число.");
-            }
-
-            numberForReturn = number;
-        }
-
-        return numberForReturn;
+        Console.WriteLine(fighter.Name + " HP: " + fighter.Health);
     }
 }
 
@@ -113,7 +119,7 @@ class Warrior
         Armor = 15;
         Damage = 25;
         AttackSpeed = 1;
-        DoubleDamageChance = 75;
+        DoubleDamageChance = 35;
     }
 
     public virtual void TakeDamage(int damage)
@@ -147,7 +153,7 @@ class Warrior
         int maxChance = 101;
         bool isSuccess = false;
 
-        if(chance >= random.Next(minChance, maxChance))
+        if (chance >= random.Next(minChance, maxChance))
         {
             isSuccess = true;
             return isSuccess;
@@ -170,7 +176,7 @@ class Tank : Warrior
 
     public override void TakeDamage(int damage)
     {
-        if(Armor > damage)
+        if (Armor > damage)
         {
             Health += damage;
         }
@@ -208,7 +214,7 @@ class Priest : Warrior
     {
         int manaCostHeal = 20;
 
-        if(Mana > 0)
+        if (Mana > 0)
         {
             Mana -= manaCostHeal;
             Health -= damage - Armor;
@@ -240,12 +246,12 @@ class Rogue : Warrior
     {
         Name = "Rogue";
         lethalHitChance = 5;
-        ivasionChance = 30;
+        ivasionChance = 20;
     }
 
     public override void TakeDamage(int damage)
     {
-        if(GetChance(ivasionChance))
+        if (GetChance(ivasionChance))
         {
             Health -= damage - Armor;
         }
@@ -268,7 +274,7 @@ class Rogue : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Разбойник, имеет шанс в 5% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в 30%");
+        Console.WriteLine("Разбойник, имеет шанс в 5% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в 20%");
     }
 }
 
@@ -276,7 +282,7 @@ class Shaman : Warrior
 {
     public int Mana { get; private set; }
 
-    public Shaman() : base() 
+    public Shaman() : base()
     {
         Name = "Shaman";
         AttackSpeed = 2;
@@ -285,7 +291,7 @@ class Shaman : Warrior
 
     public override void TakeDamage(int damage)
     {
-        if(Health+Armor <= damage && Mana == 100)
+        if (Health + Armor <= damage && Mana == 100)
         {
             Mana = 0;
             Health += 50;
