@@ -42,28 +42,35 @@ class Fight
         const string CommandPriest = "Жрец";
         const string CommandRogue = "Разбойник";
         const string CommandShaman = "Шаман";
+        bool isExit = false;
 
-        Console.WriteLine("\n" + namePlayer + " выберите бойца, написав его имя: ");
-        ShowApplicants();
-
-        string userChoice = Console.ReadLine();
-
-        switch (userChoice)
+        while (isExit == false)
         {
-            case CommandWarrior:
-                return new Warrior();
+            Console.WriteLine("\n" + namePlayer + " выберите бойца, написав его имя: ");
+            ShowApplicants();
+            string userChoice = Console.ReadLine();
 
-            case CommandTank:
-                return new Tank();
+            switch (userChoice)
+            {
+                case CommandWarrior:
+                    return new Warrior(namePlayer);
 
-            case CommandPriest:
-                return new Priest();
+                case CommandTank:
+                    return new Tank(namePlayer);
 
-            case CommandRogue:
-                return new Rogue();
+                case CommandPriest:
+                    return new Priest(namePlayer);
 
-            case CommandShaman:
-                return new Shaman();
+                case CommandRogue:
+                    return new Rogue(namePlayer);
+
+                case CommandShaman:
+                    return new Shaman(namePlayer);
+
+                default:
+                    isExit = false;
+                    break;
+            }
         }
 
         return null;
@@ -111,6 +118,16 @@ class Warrior
     public int Damage { get; protected set; }
     public int AttackSpeed { get; protected set; }
     public int DoubleDamageChance { get; protected set; }
+
+    public Warrior(string name)
+    {
+        Name = name;
+        Health = 100;
+        Armor = 15;
+        Damage = 25;
+        AttackSpeed = 1;
+        DoubleDamageChance = 35;
+    }
 
     public Warrior()
     {
@@ -167,6 +184,13 @@ class Warrior
 
 class Tank : Warrior
 {
+    public Tank(string name) : base()
+    {
+        Name = name;
+        Damage = 35;
+        Armor = 30;
+    }
+
     public Tank() : base()
     {
         Damage = 35;
@@ -201,6 +225,14 @@ class Priest : Warrior
 {
     public int Mana { get; private set; }
     public int Heal { get; private set; }
+
+    public Priest(string name) : base()
+    {
+        Name = name;
+        Armor = 10;
+        Mana = 100;
+        Heal = 30;
+    }
 
     public Priest() : base()
     {
@@ -242,11 +274,18 @@ class Rogue : Warrior
     public int lethalHitChance { get; private set; }
     public int ivasionChance { get; private set; }
 
+    public Rogue(string name) : base()
+    {
+        Name = name;
+        lethalHitChance = 5;
+        ivasionChance = 20;
+    }
+
     public Rogue() : base()
     {
         Name = "Rogue";
         lethalHitChance = 5;
-        ivasionChance = 20;
+        ivasionChance = 15;
     }
 
     public override void TakeDamage(int damage)
@@ -274,13 +313,20 @@ class Rogue : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Разбойник, имеет шанс в 5% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в 20%");
+        Console.WriteLine("Разбойник, имеет шанс в 5% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в 15%");
     }
 }
 
 class Shaman : Warrior
 {
     public int Mana { get; private set; }
+
+    public Shaman(string name) : base()
+    {
+        Name = name;
+        AttackSpeed = 2;
+        Mana = 100;
+    }
 
     public Shaman() : base()
     {
