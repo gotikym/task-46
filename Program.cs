@@ -37,46 +37,13 @@ class Fight
 
     private Warrior ChooseWar(string namePlayer)
     {
-        const string CommandWarrior = "Воин";
-        const string CommandTank = "Танк";
-        const string CommandPriest = "Жрец";
-        const string CommandRogue = "Разбойник";
-        const string CommandShaman = "Шаман";
-        bool isExit = false;
-
-        while (isExit == false)
-        {
-            Console.WriteLine("\n" + namePlayer + " выберите бойца, написав его имя: ");
-            ShowApplicants();
-            string userChoice = Console.ReadLine();
-
-            switch (userChoice)
-            {
-                case CommandWarrior:
-                    return new Warrior(namePlayer);
-
-                case CommandTank:
-                    return new Tank(namePlayer);
-
-                case CommandPriest:
-                    return new Priest(namePlayer);
-
-                case CommandRogue:
-                    return new Rogue(namePlayer);
-
-                case CommandShaman:
-                    return new Shaman(namePlayer);
-
-                default:
-                    isExit = false;
-                    break;
-            }
-        }
-
-        return null;
+        List<Warrior> warriors = GetWarriors();
+        Console.WriteLine("\n" + namePlayer + " выберите бойца: ");
+        ShowApplicants();
+        return warriors[GetNumber()];
     }
 
-    private List<Warrior> GetApplicants()
+    private List<Warrior> GetWarriors()
     {
         List<Warrior> applicants = new List<Warrior>();
         applicants.Add(new Warrior());
@@ -96,10 +63,12 @@ class Fight
 
     private void ShowApplicants()
     {
-        List<Warrior> applicants = GetApplicants();
+        byte idWarrior = 0;
+        List<Warrior> applicants = GetWarriors();
 
         foreach (Warrior warrior in applicants)
         {
+            Console.Write(idWarrior++ + "  ");
             warrior.ShowInfo();
         }
     }
@@ -107,6 +76,25 @@ class Fight
     private void ShowStats(Warrior fighter)
     {
         Console.WriteLine(fighter.Name + " HP: " + fighter.Health);
+    }
+
+    private int GetNumber()
+    {
+        bool isParse = false;
+        int numberForReturn = 0;
+
+        while (isParse == false)
+        {
+            string userNumber = Console.ReadLine();
+            isParse = int.TryParse(userNumber, out numberForReturn);
+
+            if (isParse == false)
+            {
+                Console.WriteLine("Вы не корректно ввели число.");
+            }
+        }
+
+        return numberForReturn;
     }
 }
 
@@ -150,7 +138,7 @@ class Warrior
 
         if (GetChance(DoubleDamageChance))
         {
-            return damage *= 2;
+            return damage += damage;
         }
         else
         {
@@ -160,7 +148,7 @@ class Warrior
 
     public virtual void ShowInfo()
     {
-        Console.WriteLine("Воин, имеет 75% шанса нанести удвоенный урон.");
+        Console.WriteLine("Воин, имеет " + DoubleDamageChance + "% шанса нанести удвоенный урон.");
     }
 
     public virtual bool GetChance(int chance)
@@ -265,7 +253,7 @@ class Priest : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Жрец, отхиливается каждый раз на 30% за счет маны.");
+        Console.WriteLine("Жрец, отхиливается каждый раз на " + Heal + "% за счет маны.");
     }
 }
 
@@ -313,19 +301,21 @@ class Rogue : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Разбойник, имеет шанс в 5% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в 15%");
+        Console.WriteLine("Разбойник, имеет шанс в " + lethalHitChance + "% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в " + ivasionChance + "%");
     }
 }
 
 class Shaman : Warrior
 {
     public int Mana { get; private set; }
+    public int Heal { get; private set; }
 
     public Shaman(string name) : base()
     {
         Name = name;
         AttackSpeed = 2;
         Mana = 100;
+        Heal = 50;
     }
 
     public Shaman() : base()
@@ -333,6 +323,7 @@ class Shaman : Warrior
         Name = "Shaman";
         AttackSpeed = 2;
         Mana = 100;
+        Heal = 50;
     }
 
     public override void TakeDamage(int damage)
@@ -340,7 +331,7 @@ class Shaman : Warrior
         if (Health + Armor <= damage && Mana == 100)
         {
             Mana = 0;
-            Health += 50;
+            Health += Heal;
             Health -= damage - Armor;
         }
         else
@@ -356,6 +347,6 @@ class Shaman : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Шаман, имеет изначально повышенную скорость атаки (х2), при смертельном ударе восстанавливает себе 50% жизней за счет всей маны");
+        Console.WriteLine("Шаман, имеет изначально повышенную скорость атаки х" + AttackSpeed + ", при смертельном ударе восстанавливает себе " + Heal + "% жизней за счет всей маны");
     }
 }
