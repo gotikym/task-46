@@ -14,59 +14,64 @@ class Fight
 {
     public void StartBattle()
     {
-        List<Warrior> fighters = new List<Warrior>();
         byte playerCount = 1;
-        string namePlayer1 = EnterName(playerCount);
+        string namePlayer1 = ReadName(playerCount);
         playerCount++;
-        string namePlayer2 = EnterName(playerCount);
-        fighters.Add(ChooseWar(namePlayer1));
-        fighters.Add(ChooseWar(namePlayer2));
-        Warrior firstFighter = fighters[0];
-        Warrior secondFighter = fighters[1];
+        string namePlayer2 = ReadName(playerCount);
+        Warrior firstFighter = ChooseWarrior(namePlayer1);
+        Warrior secondFighter = ChooseWarrior(namePlayer2);
         Console.WriteLine("Да начнется битва!");
 
         while (firstFighter.Health > 0 && secondFighter.Health > 0)
         {
-            firstFighter.TakeDamage(secondFighter.MakeDamage());
-            secondFighter.TakeDamage(firstFighter.MakeDamage());
+            firstFighter.Attack(secondFighter);
+            secondFighter.Attack(firstFighter);
             ShowStats(firstFighter);
             ShowStats(secondFighter);
             Console.ReadKey();
         }
     }
 
-    private Warrior ChooseWar(string namePlayer)
+    private Warrior ChooseWarrior(string namePlayer)
     {
-        List<Warrior> warriors = GetWarriors();
+        List<Warrior> warriors = CreateWarriors();
         Console.WriteLine("\n" + namePlayer + " выберите бойца: ");
-        ShowApplicants();
-        return warriors[GetNumber()];
+        ShowWarriors(warriors);
+        int warriorIndex = GetNumber();
+        int defoltIndex = 0;
+
+        if (warriorIndex >= warriors.Count)
+        {
+            Console.WriteLine("Вы странный, ввели то, чего не было в выборе, ваш боец - воин");
+            return warriors[defoltIndex];
+        }
+
+        return warriors[warriorIndex];
     }
 
-    private List<Warrior> GetWarriors()
+    private List<Warrior> CreateWarriors()
     {
         List<Warrior> applicants = new List<Warrior>();
-        applicants.Add(new Warrior());
         applicants.Add(new Tank());
         applicants.Add(new Priest());
         applicants.Add(new Rogue());
         applicants.Add(new Shaman());
+        applicants.Add(new Hunter());
 
         return applicants;
     }
 
-    private string EnterName(byte playerCount)
+    private string ReadName(byte playerCount)
     {
         Console.WriteLine("Для старта битвы введите своё имя, игрок номер " + playerCount);
         return Console.ReadLine();
     }
 
-    private void ShowApplicants()
+    private void ShowWarriors(List<Warrior> warriors)
     {
         byte idWarrior = 0;
-        List<Warrior> applicants = GetWarriors();
 
-        foreach (Warrior warrior in applicants)
+        foreach (Warrior warrior in warriors)
         {
             Console.Write(idWarrior++ + "  ");
             warrior.ShowInfo();
@@ -98,14 +103,13 @@ class Fight
     }
 }
 
-class Warrior
+abstract class Warrior
 {
     public string Name { get; protected set; }
     public int Health { get; protected set; }
     public int Armor { get; protected set; }
     public int Damage { get; protected set; }
     public int AttackSpeed { get; protected set; }
-    public int DoubleDamageChance { get; protected set; }
 
     public Warrior()
     {
@@ -114,31 +118,24 @@ class Warrior
         Armor = 15;
         Damage = 25;
         AttackSpeed = 1;
-        DoubleDamageChance = 35;
     }
 
     public virtual void TakeDamage(int damage)
     {
-        Health -= damage - Armor;
+        if (Armor < damage)
+        {
+            Health -= damage - Armor;
+        }
     }
 
-    public virtual int MakeDamage()
+    public virtual void Attack(Warrior fighter)
     {
-        int damage = Damage * AttackSpeed;
-
-        if (GetChance(DoubleDamageChance))
-        {
-            return damage += damage;
-        }
-        else
-        {
-            return damage;
-        }
+        fighter.TakeDamage(Damage);
     }
 
     public virtual void ShowInfo()
     {
-        Console.WriteLine("Воин, имеет " + DoubleDamageChance + "% шанса нанести удвоенный урон.");
+        Console.WriteLine("Меня не видно, я абстрактный...");
     }
 
     public virtual bool GetChance(int chance)
@@ -146,17 +143,8 @@ class Warrior
         Random random = new Random();
         int minChance = 0;
         int maxChance = 101;
-        bool isSuccess = false;
 
-        if (chance >= random.Next(minChance, maxChance))
-        {
-            isSuccess = true;
-            return isSuccess;
-        }
-        else
-        {
-            return isSuccess;
-        }
+        return chance >= random.Next(minChance, maxChance);
     }
 }
 
@@ -181,9 +169,9 @@ class Tank : Warrior
         }
     }
 
-    public override int MakeDamage()
+    public override void Attack(Warrior fighter)
     {
-        return Damage;
+        fighter.TakeDamage(Damage);
     }
 
     public override void ShowInfo()
@@ -209,21 +197,24 @@ class Priest : Warrior
     {
         int manaCostHeal = 20;
 
-        if (Mana > 0)
+        if (Armor < damage)
         {
-            Mana -= manaCostHeal;
-            Health -= damage - Armor;
-            Health += Heal;
-        }
-        else
-        {
-            Health -= damage - Armor;
+            if (Mana > 0)
+            {
+                Mana -= manaCostHeal;
+                Health -= damage - Armor;
+                Health += Heal;
+            }
+            else
+            {
+                Health -= damage - Armor;
+            }
         }
     }
 
-    public override int MakeDamage()
+    public override void Attack(Warrior fighter)
     {
-        return Damage;
+        fighter.TakeDamage(Damage);
     }
 
     public override void ShowInfo()
@@ -234,79 +225,129 @@ class Priest : Warrior
 
 class Rogue : Warrior
 {
-    public int lethalHitChance { get; private set; }
-    public int ivasionChance { get; private set; }
+    public int LethalHitChance { get; private set; }
+    public int IvasionChance { get; private set; }
 
     public Rogue() : base()
     {
         Name = "Rogue";
-        lethalHitChance = 5;
-        ivasionChance = 15;
+        LethalHitChance = 5;
+        IvasionChance = 15;
     }
 
     public override void TakeDamage(int damage)
     {
-        if (GetChance(ivasionChance))
+        if (Armor < damage)
         {
-            Health -= damage - Armor;
+            if (GetChance(IvasionChance))
+            {
+                Health -= damage - Armor;
+            }
         }
     }
 
-    public override int MakeDamage()
+    public override void Attack(Warrior fighter)
     {
         int damage = Damage * AttackSpeed;
         int lethalHit = 99999;
 
-        if (GetChance(lethalHitChance))
+        if (GetChance(LethalHitChance))
         {
-            return lethalHit;
+            fighter.TakeDamage(lethalHit);
         }
         else
         {
-            return damage;
+            fighter.TakeDamage(damage);
         }
     }
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Разбойник, имеет шанс в " + lethalHitChance + "% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в " + ivasionChance + "%");
+        Console.WriteLine("Разбойник, имеет шанс в " + LethalHitChance + "% отравить быстродействующим смертельным ядом, так же шанс уклониться от атаки в " + IvasionChance + "%");
     }
 }
 
 class Shaman : Warrior
 {
     public int Mana { get; private set; }
-    public int Heal { get; private set; }
+    public int AmountHealth { get; private set; }
 
     public Shaman() : base()
     {
         Name = "Shaman";
         AttackSpeed = 2;
         Mana = 100;
-        Heal = 50;
+        AmountHealth = 50;
     }
 
     public override void TakeDamage(int damage)
     {
-        if (Health + Armor <= damage && Mana == 100)
+        if (Armor < damage)
         {
-            Mana = 0;
-            Health += Heal;
-            Health -= damage - Armor;
-        }
-        else
-        {
-            Health -= damage - Armor;
+            if (Health + Armor <= damage && Mana == 100)
+            {
+                Mana = 0;
+                Health += AmountHealth;
+                Health -= damage - Armor;
+            }
+            else
+            {
+                Health -= damage - Armor;
+            }
         }
     }
 
-    public override int MakeDamage()
+    public override void Attack(Warrior fighter)
     {
-        return Damage * AttackSpeed;
+        int damage = Damage * AttackSpeed;
+        fighter.TakeDamage(damage);
     }
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Шаман, имеет изначально повышенную скорость атаки х" + AttackSpeed + ", при смертельном ударе восстанавливает себе " + Heal + "% жизней за счет всей маны");
+        Console.WriteLine("Шаман, имеет изначально повышенную скорость атаки х" + AttackSpeed + ", при смертельном ударе восстанавливает себе " + AmountHealth + "% жизней за счет всей маны");
+    }
+}
+
+class Hunter : Warrior
+{
+    public int AttackSpeedBow { get; private set; }
+    public int DamageBow { get; private set; }
+    public int Distance { get; private set; }
+
+    public Hunter() : base()
+    {
+        Name = "Hunter";
+        AttackSpeedBow = 2;
+        DamageBow = 20;
+        Distance = 2;
+    }
+
+    public override void TakeDamage(int damage)
+    {
+        if (Armor < damage)
+        {
+            Health -= damage - Armor;
+        }
+    }
+
+    public override void Attack(Warrior fighter)
+    {
+        int damageBow = AttackSpeedBow * DamageBow;
+
+        if(Distance > 0)
+        {
+            Distance--;
+            fighter.TakeDamage(damageBow);
+        }
+        else
+        {
+            fighter.TakeDamage(Damage);
+        }
+    }
+
+    public override void ShowInfo()
+    {
+        Console.WriteLine("Охотник, урона меньше, чем у остальных, но пока враг дойдет, охотник успеет выстрелить " + Distance * AttackSpeedBow + "раза, а после будет сражаться ближним оружием");
     }
 }
