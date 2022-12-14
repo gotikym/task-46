@@ -319,15 +319,22 @@ class Hunter : Warrior
     {
         Name = "Hunter";
         AttackSpeedBow = 2;
-        DamageBow = 20;
+        DamageBow = 35;
         Distance = 2;
     }
 
     public override void TakeDamage(int damage)
     {
-        if (Armor < damage)
+        if (Distance > 0)
         {
-            Health -= damage - Armor;
+            Distance--;
+        }
+        else
+        {
+            if (Armor < damage)
+            {
+                Health -= damage - Armor;
+            }
         }
     }
 
@@ -336,8 +343,7 @@ class Hunter : Warrior
         int damageBow = AttackSpeedBow * DamageBow;
 
         if(Distance > 0)
-        {
-            Distance--;
+        {            
             fighter.TakeDamage(damageBow);
         }
         else
@@ -348,6 +354,6 @@ class Hunter : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Охотник, урона меньше, чем у остальных, но пока враг дойдет, охотник успеет выстрелить " + Distance * AttackSpeedBow + "раза, а после будет сражаться ближним оружием");
+        Console.WriteLine("Охотник, пока враг дойдет, охотник успеет выстрелить " + Distance * AttackSpeedBow + "раза, а после будет сражаться в ближнем бою");
     }
 }
