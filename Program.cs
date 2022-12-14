@@ -107,16 +107,6 @@ class Warrior
     public int AttackSpeed { get; protected set; }
     public int DoubleDamageChance { get; protected set; }
 
-    public Warrior(string name)
-    {
-        Name = name;
-        Health = 100;
-        Armor = 15;
-        Damage = 25;
-        AttackSpeed = 1;
-        DoubleDamageChance = 35;
-    }
-
     public Warrior()
     {
         Name = "Warrior";
@@ -172,13 +162,6 @@ class Warrior
 
 class Tank : Warrior
 {
-    public Tank(string name) : base()
-    {
-        Name = name;
-        Damage = 35;
-        Armor = 30;
-    }
-
     public Tank() : base()
     {
         Damage = 35;
@@ -213,14 +196,6 @@ class Priest : Warrior
 {
     public int Mana { get; private set; }
     public int Heal { get; private set; }
-
-    public Priest(string name) : base()
-    {
-        Name = name;
-        Armor = 10;
-        Mana = 100;
-        Heal = 30;
-    }
 
     public Priest() : base()
     {
@@ -262,13 +237,6 @@ class Rogue : Warrior
     public int lethalHitChance { get; private set; }
     public int ivasionChance { get; private set; }
 
-    public Rogue(string name) : base()
-    {
-        Name = name;
-        lethalHitChance = 5;
-        ivasionChance = 20;
-    }
-
     public Rogue() : base()
     {
         Name = "Rogue";
@@ -309,14 +277,6 @@ class Shaman : Warrior
 {
     public int Mana { get; private set; }
     public int Heal { get; private set; }
-
-    public Shaman(string name) : base()
-    {
-        Name = name;
-        AttackSpeed = 2;
-        Mana = 100;
-        Heal = 50;
-    }
 
     public Shaman() : base()
     {
