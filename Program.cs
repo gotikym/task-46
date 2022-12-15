@@ -18,16 +18,16 @@ class Fight
         string namePlayer1 = ReadName(playerCount);
         playerCount++;
         string namePlayer2 = ReadName(playerCount);
-        Warrior firstFighter = ChooseWarrior(namePlayer1);
-        Warrior secondFighter = ChooseWarrior(namePlayer2);
+        Warrior firstWarrior = ChooseWarrior(namePlayer1);
+        Warrior secondWarrior = ChooseWarrior(namePlayer2);
         Console.WriteLine("Да начнется битва!");
 
-        while (firstFighter.Health > 0 && secondFighter.Health > 0)
+        while (firstWarrior.Health > 0 && secondWarrior.Health > 0)
         {
-            firstFighter.Attack(secondFighter);
-            secondFighter.Attack(firstFighter);
-            ShowStats(firstFighter);
-            ShowStats(secondFighter);
+            firstWarrior.Attack(secondWarrior);
+            secondWarrior.Attack(firstWarrior);
+            ShowStats(firstWarrior);
+            ShowStats(secondWarrior);
             Console.ReadKey();
         }
     }
@@ -40,7 +40,7 @@ class Fight
         int warriorIndex = GetNumber();
         int defoltIndex = 0;
 
-        if (warriorIndex >= warriors.Count)
+        if (warriorIndex >= warriors.Count || warriorIndex < 0)
         {
             Console.WriteLine("Вы странный, ввели то, чего не было в выборе, ваш боец - воин");
             return warriors[defoltIndex];
@@ -51,14 +51,14 @@ class Fight
 
     private List<Warrior> CreateWarriors()
     {
-        List<Warrior> applicants = new List<Warrior>();
-        applicants.Add(new Tank());
-        applicants.Add(new Priest());
-        applicants.Add(new Rogue());
-        applicants.Add(new Shaman());
-        applicants.Add(new Hunter());
+        List<Warrior> warriors = new List<Warrior>();
+        warriors.Add(new Tank());
+        warriors.Add(new Priest());
+        warriors.Add(new Rogue());
+        warriors.Add(new Shaman());
+        warriors.Add(new Hunter());
 
-        return applicants;
+        return warriors;
     }
 
     private string ReadName(byte playerCount)
@@ -78,9 +78,9 @@ class Fight
         }
     }
 
-    private void ShowStats(Warrior fighter)
+    private void ShowStats(Warrior warrior)
     {
-        Console.WriteLine(fighter.Name + " HP: " + fighter.Health);
+        Console.WriteLine(warrior.Name + " HP: " + warrior.Health);
     }
 
     private int GetNumber()
@@ -128,9 +128,9 @@ abstract class Warrior
         }
     }
 
-    public virtual void Attack(Warrior fighter)
+    public virtual void Attack(Warrior warrior)
     {
-        fighter.TakeDamage(Damage);
+        warrior.TakeDamage(Damage);
     }
 
     public virtual void ShowInfo()
@@ -161,7 +161,7 @@ class Tank : Warrior
     {
         if (Armor > damage)
         {
-            Health += damage;
+            Health += damage - Armor;
         }
         else
         {
@@ -169,10 +169,7 @@ class Tank : Warrior
         }
     }
 
-    public override void Attack(Warrior fighter)
-    {
-        fighter.TakeDamage(Damage);
-    }
+    public void Attack() { }
 
     public override void ShowInfo()
     {
@@ -212,10 +209,7 @@ class Priest : Warrior
         }
     }
 
-    public override void Attack(Warrior fighter)
-    {
-        fighter.TakeDamage(Damage);
-    }
+    public void Attack() { }
 
     public override void ShowInfo()
     {
@@ -246,18 +240,18 @@ class Rogue : Warrior
         }
     }
 
-    public override void Attack(Warrior fighter)
+    public override void Attack(Warrior warrior)
     {
         int damage = Damage * AttackSpeed;
         int lethalHit = 99999;
 
         if (GetChance(LethalHitChance))
         {
-            fighter.TakeDamage(lethalHit);
+            warrior.TakeDamage(lethalHit);
         }
         else
         {
-            fighter.TakeDamage(damage);
+            warrior.TakeDamage(damage);
         }
     }
 
@@ -297,10 +291,10 @@ class Shaman : Warrior
         }
     }
 
-    public override void Attack(Warrior fighter)
+    public override void Attack(Warrior warrior)
     {
         int damage = Damage * AttackSpeed;
-        fighter.TakeDamage(damage);
+        warrior.TakeDamage(damage);
     }
 
     public override void ShowInfo()
@@ -338,17 +332,17 @@ class Hunter : Warrior
         }
     }
 
-    public override void Attack(Warrior fighter)
+    public override void Attack(Warrior warrior)
     {
         int damageBow = AttackSpeedBow * DamageBow;
 
         if(Distance > 0)
         {            
-            fighter.TakeDamage(damageBow);
+            warrior.TakeDamage(damageBow);
         }
         else
         {
-            fighter.TakeDamage(Damage);
+            warrior.TakeDamage(Damage);
         }
     }
 
