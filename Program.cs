@@ -169,8 +169,6 @@ class Tank : Warrior
         }
     }
 
-    public void Attack() { }
-
     public override void ShowInfo()
     {
         Console.WriteLine("Танк, медленный и неповоротливый, но с мощной дубиной и если ваш удар слаб, ТАНК лишь поднимет свои хп =)");
@@ -208,8 +206,6 @@ class Priest : Warrior
             }
         }
     }
-
-    public void Attack() { }
 
     public override void ShowInfo()
     {
@@ -334,16 +330,14 @@ class Hunter : Warrior
 
     public override void Attack(Warrior warrior)
     {
-        int damageBow = AttackSpeedBow * DamageBow;
+        int damage = Damage;
 
         if(Distance > 0)
-        {            
-            warrior.TakeDamage(damageBow);
-        }
-        else
         {
-            warrior.TakeDamage(Damage);
+            damage = AttackSpeedBow * DamageBow;
         }
+
+        warrior.TakeDamage(damage);
     }
 
     public override void ShowInfo()
