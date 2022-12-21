@@ -342,6 +342,7 @@ class Hunter : Warrior
 
     public override void ShowInfo()
     {
-        Console.WriteLine("Охотник, пока враг дойдет, охотник успеет выстрелить " + Distance * AttackSpeedBow + "раза, а после будет сражаться в ближнем бою");
+        int attackCount = Distance * AttackSpeedBow;
+        Console.WriteLine("Охотник, пока враг дойдет, охотник успеет выстрелить " + attackCount + "раза, а после будет сражаться в ближнем бою");
     }
 }
